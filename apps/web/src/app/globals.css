@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens AGROGENIUS — HSL para composição com opacidade */
+@layer base {
+  :root {
+    --background: 120 18% 97%; /* #F5F8F5 */
+    --foreground: 152 22% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 152 22% 7%;
+    --muted: 130 14% 92%;
+    --muted-foreground: 145 5% 40%;
+    --border: 135 12% 86%;
+    --input: 135 12% 84%;
+    --ring: 151 67% 46%;
+    --primary: 151 67% 36%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 150 54% 15%; /* #123D2A */
+    --accent-foreground: 146 72% 84%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --grid: 151 30% 20% / 0.06;
+  }
+  .dark {
+    --background: 152 31% 6%; /* #0B1511 */
+    --foreground: 120 18% 96%;
+    --card: 152 26% 9%;
+    --card-foreground: 120 18% 96%;
+    --muted: 152 20% 13%;
+    --muted-foreground: 145 5% 57%; /* ~#89958E */
+    --border: 152 18% 17%;
+    --input: 152 18% 20%;
+    --ring: 151 67% 46%;
+    --primary: 151 67% 46%; /* #27C77B */
+    --primary-foreground: 152 31% 6%;
+    --accent: 146 72% 84%; /* #B7F3D0 */
+    --accent-foreground: 150 54% 15%;
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 38 92% 56%;
+    --grid: 146 72% 84% / 0.05;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+  }
+}
+
+@layer components {
+  /* Fundo com grelha subtil — referência a parcelas agrícolas */
+  .bg-field-grid {
+    background-image:
+      linear-gradient(hsl(var(--grid)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid)) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .glass {
+    @apply border border-white/10 bg-card/60 backdrop-blur-xl;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* MapLibre: integrar com o tema */
+.maplibregl-ctrl-group {
+  @apply !rounded-md !border !border-border !bg-card !shadow-soft;
+}
+.maplibregl-ctrl-group button + button {
+  @apply !border-border;
+}
+.maplibregl-popup-content {
+  @apply !rounded-md !border !border-border !bg-card !text-card-foreground !shadow-soft;
+}
+.maplibregl-popup-tip {
+  @apply !border-t-card;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

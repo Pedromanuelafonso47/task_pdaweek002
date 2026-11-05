@@ -1,0 +1,826 @@
+// AGROGENIUS — modelo de dados
+// Geografia: GeoJSON em JSONB + lat/lng (ver docs/ARCHITECTURE.md §2).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Identidade & tenancy ───────────────────────────
+
+enum OrganizationType {
+  INDIVIDUAL
+  COOPERATIVE
+  COMPANY
+  NGO
+}
+
+enum Role {
+  FARMER
+  TECHNICIAN
+  ADMIN
+}
+
+enum FarmerType {
+  FAMILY
+  COMMERCIAL
+  COOPERATIVE
+  ENTERPRISE
+}
+
+model Organization {
+  id        String           @id @default(cuid())
+  name      String
+  type      OrganizationType @default(INDIVIDUAL)
+  country   String           @default("AO")
+  currency  String           @default("AOA")
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  users        User[]
+  farms        Farm[]
+  transactions Transaction[]
+}
+
+model User {
+  id                  String      @id @default(cuid())
+  email               String      @unique
+  phone               String?
+  passwordHash        String
+  fullName            String
+  role                Role        @default(FARMER)
+  farmerType          FarmerType?
+  province            String?
+  municipality        String?
+  locality            String?
+  onboardingCompleted Boolean     @default(false)
+  /// rascunho do onboarding por etapas (retomar noutro dispositivo)
+  onboardingDraft     Json?
+  isActive            Boolean     @default(true)
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id])
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  lastLoginAt         DateTime?
+
+  refreshTokens   RefreshToken[]
+  ownedFarms      Farm[]                 @relation("FarmOwner")
+  assignments     TechnicianAssignment[]
+  favorites       Favorite[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  conversations   AiConversation[]
+  commands        Command[]
+  recommendations Recommendation[]       @relation("RecommendationAuthor")
+  validations     Recommendation[]       @relation("RecommendationValidator")
+
+  @@index([organizationId])
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  familyId   String // rotação: reutilização de um token revoga toda a família
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedBy String?
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model TechnicianAssignment {
+  id           String    @id @default(cuid())
+  technicianId String
+  technician   User      @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  farmId       String
+  farm         Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  grantedAt    DateTime  @default(now())
+  revokedAt    DateTime?
+
+  @@unique([technicianId, farmId])
+}
+
+// ─────────────────────────────── Propriedades ───────────────────────────────
+
+enum TerrainType {
+  FLAT
+  GENTLE_SLOPE
+  STEEP_SLOPE
+  VALLEY
+  MIXED
+}
+
+enum SoilType {
+  CLAY
+  SANDY
+  LOAM
+  SILT
+  CLAY_LOAM
+  SANDY_LOAM
+  LATERITIC
+  UNKNOWN
+}
+
+enum WaterAvailability {
+  SCARCE
+  SEASONAL
+  MODERATE
+  ABUNDANT
+}
+
+enum WaterSource {
+  WELL
+  BOREHOLE
+  RIVER
+  LAKE
+  RAINWATER
+  MUNICIPAL
+  DAM
+  NONE
+}
+
+enum IrrigationSystem {
+  NONE
+  MANUAL
+  FURROW
+  SPRINKLER
+  DRIP
+  PIVOT
+}
+
+enum Connectivity {
+  NONE
+  LIMITED
+  GOOD
+}
+
+enum TechLevel {
+  NONE
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Farm {
+  id                String            @id @default(cuid())
+  organizationId    String
+  organization      Organization      @relation(fields: [organizationId], references: [id])
+  ownerId           String
+  owner             User              @relation("FarmOwner", fields: [ownerId], references: [id])
+  name              String
+  province          String
+  municipality      String?
+  locality          String?
+  latitude          Float?
+  longitude         Float?
+  /// GeoJSON Polygon do limite da propriedade
+  boundary          Json?
+  totalAreaHa       Decimal           @db.Decimal(10, 2)
+  cultivatedAreaHa  Decimal           @db.Decimal(10, 2)
+  terrainType       TerrainType       @default(FLAT)
+  soilType          SoilType          @default(UNKNOWN)
+  waterAvailability WaterAvailability @default(MODERATE)
+  waterSource       WaterSource       @default(NONE)
+  irrigationSystem  IrrigationSystem  @default(NONE)
+  hasElectricity    Boolean           @default(false)
+  internet          Connectivity      @default(NONE)
+  hasSensors        Boolean           @default(false)
+  hasPumps          Boolean           @default(false)
+  hasMachinery      Boolean           @default(false)
+  techLevel         TechLevel         @default(NONE)
+  budgetKz          Decimal?          @db.Decimal(14, 2)
+  /// ex.: REDUCE_WATER, INCREASE_YIELD, MONITOR_SOIL, AUTOMATE_IRRIGATION, REDUCE_COSTS, MONITOR_CLIMATE, PEST_CONTROL
+  goals             String[]
+  /// ex.: WATER_WASTE, DROUGHT, PESTS, LOW_YIELD, SOIL_DEGRADATION, HIGH_LABOR_COST, FROST, FLOODING
+  problems          String[]
+  otherGoal         String?
+  photos            String[]
+  isDemo            Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  fields          Field[]
+  plantings       Planting[]
+  transactions    Transaction[]
+  devices         Device[]
+  automations     AutomationRule[]
+  recommendations Recommendation[]
+  farmProjects    FarmProject[]
+  assignments     TechnicianAssignment[]
+  history         FarmEvent[]
+
+  @@index([organizationId])
+  @@index([ownerId])
+}
+
+/// Zona agrícola dentro de uma propriedade
+model Field {
+  id             String    @id @default(cuid())
+  farmId         String
+  farm           Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  name           String
+  areaHa         Decimal   @db.Decimal(10, 2)
+  boundary       Json?
+  soilType       SoilType?
+  isIrrigationZone Boolean @default(false)
+  color          String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  plantings Planting[]
+  devices   Device[]
+  sensors   Sensor[]
+
+  @@index([farmId])
+}
+
+model FarmEvent {
+  id        String   @id @default(cuid())
+  farmId    String
+  farm      Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  type      String
+  summary   String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([farmId, createdAt])
+}
+
+// ─────────────────────────────── Culturas ───────────────────────────────────
+
+enum WaterNeed {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Crop {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  name            String
+  scientificName  String?
+  category        String // cereal, leguminosa, hortícola, tubérculo, fruteira
+  cycleDays       Int
+  waterNeed       WaterNeed
+  /// humidade volumétrica do solo (%) recomendada — referência agronómica geral
+  soilMoistureMin Float
+  soilMoistureMax Float
+  tempMin         Float
+  tempMax         Float
+  /// [{ key, name, startDay, endDay, kc }]
+  stages          Json
+  notes           String?
+
+  plantings Planting[]
+}
+
+enum PlantingStatus {
+  PLANNED
+  GROWING
+  HARVESTED
+  FAILED
+}
+
+model Planting {
+  id                String         @id @default(cuid())
+  farmId            String
+  farm              Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  fieldId           String?
+  field             Field?         @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  cropId            String
+  crop              Crop           @relation(fields: [cropId], references: [id])
+  areaHa            Decimal        @db.Decimal(10, 2)
+  seedVariety       String?
+  seedQuantityKg    Decimal?       @db.Decimal(10, 2)
+  season            String? // ex.: "Época A (Set–Jan)"
+  harvestFrequency  String? // ex.: "1x/ano", "contínua"
+  plantedAt         DateTime?
+  expectedHarvestAt DateTime?
+  status            PlantingStatus @default(PLANNED)
+  estimatedYieldKg  Decimal?       @db.Decimal(12, 2)
+  clientId          String?        @unique // idempotência offline
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  activities   CropActivity[]
+  harvests     Harvest[]
+  transactions Transaction[]
+
+  @@index([farmId])
+}
+
+enum ActivityType {
+  SOWING
+  FERTILIZER
+  TREATMENT
+  IRRIGATION
+  WEEDING
+  OBSERVATION
+  OTHER
+}
+
+model CropActivity {
+  id         String       @id @default(cuid())
+  plantingId String
+  planting   Planting     @relation(fields: [plantingId], references: [id], onDelete: Cascade)
+  type       ActivityType
+  date       DateTime
+  product    String?
+  quantity   Decimal?     @db.Decimal(12, 3)
+  unit       String?
+  notes      String?
+  clientId   String?      @unique
+  createdAt  DateTime     @default(now())
+
+  @@index([plantingId, date])
+}
+
+model Harvest {
+  id         String   @id @default(cuid())
+  plantingId String
+  planting   Planting @relation(fields: [plantingId], references: [id], onDelete: Cascade)
+  date       DateTime
+  quantityKg Decimal  @db.Decimal(12, 2)
+  quality    String?
+  notes      String?
+  clientId   String?  @unique
+  createdAt  DateTime @default(now())
+
+  @@index([plantingId])
+}
+
+// ─────────────────────────────── Finanças ───────────────────────────────────
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+}
+
+enum TransactionCategory {
+  SEEDS
+  FERTILIZER
+  PESTICIDE
+  LABOR
+  IRRIGATION
+  EQUIPMENT
+  IOT
+  FUEL
+  TRANSPORT
+  RENT
+  SALES
+  SUBSIDY
+  OTHER
+}
+
+model Transaction {
+  id             String              @id @default(cuid())
+  organizationId String
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+  farmId         String?
+  farm           Farm?               @relation(fields: [farmId], references: [id], onDelete: SetNull)
+  plantingId     String?
+  planting       Planting?           @relation(fields: [plantingId], references: [id], onDelete: SetNull)
+  type           TransactionType
+  category       TransactionCategory
+  amount         Decimal             @db.Decimal(14, 2)
+  currency       String              @default("AOA")
+  date           DateTime
+  description    String?
+  clientId       String?             @unique
+  createdAt      DateTime            @default(now())
+
+  @@index([organizationId, date])
+  @@index([farmId, date])
+}
+
+// ─────────────────────────────────── IoT ────────────────────────────────────
+
+enum DeviceType {
+  CONTROLLER
+  SENSOR_NODE
+  GATEWAY
+  WEATHER_STATION
+}
+
+enum DeviceStatus {
+  PENDING
+  ONLINE
+  OFFLINE
+  DISABLED
+}
+
+enum OperationMode {
+  AUTO
+  MANUAL
+}
+
+model Device {
+  id              String        @id @default(cuid())
+  farmId          String
+  farm            Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  fieldId         String?
+  field           Field?        @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  name            String
+  type            DeviceType
+  hardware        String        @default("ESP32")
+  serial          String?
+  mqttUsername    String        @unique
+  secretHash      String
+  status          DeviceStatus  @default(PENDING)
+  mode            OperationMode @default(AUTO)
+  /// true: o firmware executa as regras localmente (servidor envia config e monitoriza);
+  /// false: o servidor avalia as regras e envia comandos. Nunca os dois ao mesmo tempo.
+  localRules      Boolean       @default(true)
+  lastSeenAt      DateTime?
+  firmwareVersion String?
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  sensors   Sensor[]
+  actuators Actuator[]
+
+  @@index([farmId])
+}
+
+enum SensorKind {
+  SOIL_MOISTURE
+  SOIL_TEMPERATURE
+  SOIL_PH
+  SOIL_EC
+  AIR_TEMPERATURE
+  AIR_HUMIDITY
+  LIGHT
+  RAIN
+  WATER_LEVEL
+  WATER_FLOW
+  ENERGY
+}
+
+model Sensor {
+  id           String     @id @default(cuid())
+  deviceId     String
+  device       Device     @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  fieldId      String?
+  field        Field?     @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  key          String // chave usada no payload MQTT, ex.: "sm1"
+  kind         SensorKind
+  unit         String
+  minThreshold Float?
+  maxThreshold Float?
+  calibration  Json?
+  createdAt    DateTime   @default(now())
+
+  readings     SensorReading[]
+  triggerRules AutomationRule[] @relation("TriggerSensor")
+  levelRules   AutomationRule[] @relation("WaterLevelSensor")
+
+  @@unique([deviceId, key])
+}
+
+model SensorReading {
+  id         BigInt   @id @default(autoincrement())
+  sensorId   String
+  sensor     Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  value      Float
+  recordedAt DateTime
+  receivedAt DateTime @default(now())
+
+  @@index([sensorId, recordedAt])
+}
+
+enum ActuatorKind {
+  PUMP
+  VALVE
+  FAN
+  LIGHT
+  OTHER
+}
+
+model Actuator {
+  id            String       @id @default(cuid())
+  deviceId      String
+  device        Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  key           String // ex.: "pump1"
+  kind          ActuatorKind
+  name          String
+  isOn          Boolean      @default(false)
+  /// limite absoluto de segurança por ativação
+  maxRuntimeSec Int          @default(1800)
+  lastChangedAt DateTime?
+
+  commands Command[]
+  rules    AutomationRule[]
+
+  @@unique([deviceId, key])
+}
+
+enum ComparisonOperator {
+  LT
+  GT
+}
+
+model AutomationRule {
+  id                 String             @id @default(cuid())
+  farmId             String
+  farm               Farm               @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  name               String
+  enabled            Boolean            @default(true)
+  sensorId           String
+  sensor             Sensor             @relation("TriggerSensor", fields: [sensorId], references: [id], onDelete: Cascade)
+  operator           ComparisonOperator @default(LT)
+  threshold          Float
+  /// condição de paragem (ex.: humidade >= stopThreshold)
+  stopThreshold      Float
+  actuatorId         String
+  actuator           Actuator           @relation(fields: [actuatorId], references: [id], onDelete: Cascade)
+  maxDurationSec     Int                @default(900)
+  cooldownSec        Int                @default(1800)
+  /// proteção contra funcionamento a seco
+  waterLevelSensorId String?
+  waterLevelSensor   Sensor?            @relation("WaterLevelSensor", fields: [waterLevelSensorId], references: [id], onDelete: SetNull)
+  minWaterLevel      Float?
+  /// janela horária permitida "HH:MM"
+  activeFrom         String?
+  activeTo           String?
+  lastTriggeredAt    DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  commands Command[]
+}
+
+enum CommandAction {
+  ON
+  OFF
+}
+
+enum CommandStatus {
+  PENDING
+  SENT
+  ACKED
+  REJECTED
+  FAILED
+  EXPIRED
+}
+
+model Command {
+  id          String        @id @default(cuid())
+  actuatorId  String
+  actuator    Actuator      @relation(fields: [actuatorId], references: [id], onDelete: Cascade)
+  issuedById  String?
+  issuedBy    User?         @relation(fields: [issuedById], references: [id], onDelete: SetNull)
+  ruleId      String?
+  rule        AutomationRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  action      CommandAction
+  durationSec Int?
+  status      CommandStatus @default(PENDING)
+  reason      String?
+  createdAt   DateTime      @default(now())
+  ackAt       DateTime?
+
+  @@index([actuatorId, createdAt])
+}
+
+// ─────────────────── AgroTech Lab & Recomendações ──────────────────────────
+
+enum ProjectCategory {
+  SMART_IRRIGATION
+  SOIL_MONITORING
+  ENVIRONMENTAL_MONITORING
+  SMART_FARMING
+  RESOURCE_MANAGEMENT
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Project {
+  id                 String          @id @default(cuid())
+  slug               String          @unique
+  title              String
+  tagline            String
+  category           ProjectCategory
+  difficulty         Difficulty
+  implementationDays Int
+  /// problemas que o projeto resolve (mesmos códigos de Farm.problems)
+  solves             String[]
+  /// objetivos que suporta (mesmos códigos de Farm.goals)
+  supportsGoals      String[]
+  requiresElectricity Boolean        @default(false)
+  worksOffline       Boolean         @default(true)
+  /// pré-requisitos eliminatórios: PUMP, WATER_SOURCE, GRID_ELECTRICITY
+  requires           String[]
+  /// o projeto decide quando regar
+  controlsIrrigation Boolean         @default(false)
+  description        String
+  /// passos de funcionamento
+  howItWorks         String[]
+  architecture       Json // { nodes: [], edges: [] }
+  wiring             Json // [{ from, to, note }]
+  firmware           String?
+  assemblySteps      String[]
+  maintenance        String[]
+  benefits           String[]
+  limitations        String[]
+  useCases           String[]
+  published          Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  components      ProjectComponent[]
+  favorites       Favorite[]
+  recommendations Recommendation[]
+  farmProjects    FarmProject[]
+}
+
+enum QuantityRule {
+  FIXED
+  PER_HECTARE
+  PER_ZONE
+}
+
+model ProjectComponent {
+  id          String       @id @default(cuid())
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  spec        String?
+  quantity    Float
+  quantityRule QuantityRule @default(FIXED)
+  maxQuantity Int?
+  /// preço unitário de referência (estimativa) em Kz
+  unitPriceKz Decimal      @db.Decimal(12, 2)
+  priceSource String       @default("Estimativa de referência AGROGENIUS (2026) — confirmar com fornecedores locais")
+  optional    Boolean      @default(false)
+  /// condição para incluir: ex. "NO_PUMP" só se a propriedade não tem bomba
+  condition   String?
+  sortOrder   Int          @default(0)
+}
+
+model Favorite {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, projectId])
+}
+
+enum RecommendationSource {
+  ENGINE
+  TECHNICIAN
+}
+
+enum RecommendationStatus {
+  PENDING
+  ACCEPTED
+  DISMISSED
+  IMPLEMENTED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Recommendation {
+  id              String               @id @default(cuid())
+  farmId          String
+  farm            Farm                 @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  projectId       String
+  project         Project              @relation(fields: [projectId], references: [id])
+  source          RecommendationSource @default(ENGINE)
+  engineVersion   String?
+  score           Float
+  priority        Priority
+  problem         String
+  /// [{ code, text, weight }] — razões ligadas a dados concretos da propriedade
+  reasons         Json
+  /// lista de materiais calculada para esta propriedade
+  bom             Json
+  estimatedCostKz Decimal              @db.Decimal(14, 2)
+  withinBudget    Boolean
+  /// { kind: "ESTIMATE", assumptions: [], paybackMonths?, annualSavingsKz? }
+  roi             Json?
+  /// implementação faseada sugerida quando o total excede o orçamento
+  phases          Json?
+  warnings        String[]
+  status          RecommendationStatus @default(PENDING)
+  authorId        String?
+  author          User?                @relation("RecommendationAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  validatedById   String?
+  validatedBy     User?                @relation("RecommendationValidator", fields: [validatedById], references: [id], onDelete: SetNull)
+  validatedAt     DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  farmProject FarmProject?
+
+  @@unique([farmId, projectId, source])
+  @@index([farmId, status])
+}
+
+enum FarmProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model FarmProject {
+  id               String            @id @default(cuid())
+  farmId           String
+  farm             Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  projectId        String
+  project          Project           @relation(fields: [projectId], references: [id])
+  recommendationId String?           @unique
+  recommendation   Recommendation?   @relation(fields: [recommendationId], references: [id], onDelete: SetNull)
+  status           FarmProjectStatus @default(PLANNED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  actualCostKz     Decimal?          @db.Decimal(14, 2)
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+// ───────────────────────── IA, Notificações, Auditoria ─────────────────────
+
+model AiConversation {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farmId    String?
+  title     String
+  createdAt DateTime    @default(now())
+  messages  AiMessage[]
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // user | assistant
+  content        String
+  /// "LLM" ou "RULES" — o utilizador vê de onde veio a resposta
+  engine         String?
+  createdAt      DateTime       @default(now())
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farmId    String?
+  type      String // LOW_MOISTURE, HIGH_TEMP, SENSOR_OFFLINE, IRRIGATION_FAILURE, LOW_RESERVOIR, HARVEST_SOON, MAINTENANCE, NEW_RECOMMENDATION
+  severity  NotificationSeverity @default(INFO)
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organizationId String?
+  action         String
+  entity         String
+  entityId       String?
+  meta           Json?
+  ip             String?
+  createdAt      DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId, createdAt])
+}

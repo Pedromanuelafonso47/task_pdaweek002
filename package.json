@@ -1,0 +1,24 @@
+{
+  "name": "agrogenius",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AGROGENIUS — Intelligent Agriculture Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "db:start": "node scripts/dev-db.mjs",
+    "dev:api": "npm run dev -w @agrogenius/api",
+    "dev:web": "npm run dev -w @agrogenius/web",
+    "build": "npm run build -w @agrogenius/shared && npm run build -w @agrogenius/api && npm run build -w @agrogenius/web",
+    "test": "npm test -w @agrogenius/api",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "embedded-postgres": "17.11.0-beta.19"
+  }
+}

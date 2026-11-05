@@ -1,0 +1,74 @@
+{
+  "name": "@agrogenius/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest",
+    "prisma:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "seed:demo": "ts-node --transpile-only prisma/seed-demo.ts",
+    "iot:simulate": "ts-node --transpile-only scripts/simulate-device.ts",
+    "test:smoke": "node scripts/smoke.mjs"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
+  },
+  "dependencies": {
+    "@agrogenius/shared": "0.1.0",
+    "@anthropic-ai/sdk": "^1.5.0",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/jwt": "^11.0.1",
+    "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/platform-socket.io": "^11.1.9",
+    "@nestjs/swagger": "^11.2.3",
+    "@nestjs/throttler": "^6.4.0",
+    "@nestjs/websockets": "^11.1.9",
+    "@prisma/client": "6.19.3",
+    "argon2": "^0.44.0",
+    "cookie-parser": "^1.4.7",
+    "helmet": "^8.1.0",
+    "mqtt": "^5.14.1",
+    "pdfkit": "^0.17.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "socket.io": "^4.8.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/testing": "^11.1.9",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.18.0",
+    "@types/pdfkit": "^0.17.3",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "prisma": "6.19.3",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": "[.]spec[.]ts$",
+    "transform": {
+      "^.+[.]ts$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  }
+}

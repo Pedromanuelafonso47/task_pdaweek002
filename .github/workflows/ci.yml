@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_PASSWORD: agrogenius
+          POSTGRES_DB: agrogenius
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:agrogenius@localhost:5432/agrogenius?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-0123456789abcdef0123456789
+      JWT_REFRESH_SECRET: ci-refresh-secret-0123456789abcdef012345678
+      WEB_ORIGIN: http://localhost:3000
+      ADMIN_PASSWORD: ci-admin-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @agrogenius/shared
+      - name: Prisma
+        working-directory: apps/api
+        run: npx prisma migrate deploy && npx prisma generate && npm run db:seed
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Testes unitários (motor de recomendações + segurança IoT)
+        run: npm test
+      - name: Build API
+        run: npm run build -w @agrogenius/api
+      - name: Testes de ponta a ponta (API real + BD)
+        working-directory: apps/api
+        run: |
+          node dist/main.js &
+          for i in $(seq 1 30); do curl -sf localhost:4000/api/health && break; sleep 1; done
+          node scripts/smoke.mjs
+      - name: Build Web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api
+        run: npm run build -w @agrogenius/web

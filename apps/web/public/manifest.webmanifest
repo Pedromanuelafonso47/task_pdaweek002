@@ -1,0 +1,11 @@
+{
+  "name": "AGROGENIUS",
+  "short_name": "AGROGENIUS",
+  "description": "Plataforma inteligente de gestão agrária e automação IoT",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0B1511",
+  "theme_color": "#123D2A",
+  "lang": "pt-AO",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
