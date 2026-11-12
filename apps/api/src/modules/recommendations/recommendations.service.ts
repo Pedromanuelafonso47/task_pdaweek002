@@ -108,6 +108,7 @@ export class RecommendationsService {
         const data = {
           engineVersion: result.version,
           score: r.score,
+          rawScore: r.rawScore,
           priority: r.priority,
           problem: r.problem,
           reasons: r.reasons as unknown as Prisma.InputJsonValue,
@@ -151,7 +152,7 @@ export class RecommendationsService {
           validatedBy: { select: { id: true, fullName: true } },
           author: { select: { id: true, fullName: true } },
         },
-        orderBy: [{ status: 'asc' }, { score: 'desc' }],
+        orderBy: [{ status: 'asc' }, { rawScore: 'desc' }],
       }),
       this.buildProfile(farmId),
       this.catalog(),
@@ -189,7 +190,7 @@ export class RecommendationsService {
     return this.prisma.recommendation.findMany({
       where: { farmId: { in: farmIds }, status: 'PENDING' },
       include: { project: projectSummary, farm: { select: { id: true, name: true } } },
-      orderBy: { score: 'desc' },
+      orderBy: { rawScore: 'desc' },
       take: 10,
     });
   }

@@ -198,7 +198,7 @@ async function main() {
   for (const r of result.recommendations) {
     await prisma.recommendation.create({
       data: {
-        farmId: farm.id, projectId: r.projectId, source: 'ENGINE', engineVersion: result.version, score: r.score, priority: r.priority, problem: r.problem,
+        farmId: farm.id, projectId: r.projectId, source: 'ENGINE', engineVersion: result.version, score: r.score, rawScore: r.rawScore, priority: r.priority, problem: r.problem,
         reasons: r.reasons as unknown as Prisma.InputJsonValue, bom: r.bom as unknown as Prisma.InputJsonValue, estimatedCostKz: r.estimatedCostKz,
         withinBudget: r.withinBudget, roi: r.roi as unknown as Prisma.InputJsonValue, phases: r.phases as unknown as Prisma.InputJsonValue, warnings: r.warnings,
       },

@@ -120,6 +120,8 @@ export interface EngineRecommendation {
   projectId: string;
   projectSlug: string;
   score: number;
+  /** pontuação antes do limite de 100 — usada para desempatar */
+  rawScore: number;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   problem: string;
   reasons: Reason[];

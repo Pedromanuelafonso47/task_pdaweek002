@@ -202,8 +202,8 @@ export default function FarmScene({
   const border = React.useMemo(() => [...layout.terrain, layout.terrain[0]].map(([x, y]) => new THREE.Vector3(x, TERRAIN_H + 0.1, -y)), [layout.terrain]);
   return (
     <Canvas shadows camera={{ position: [0, 9, 11], fov: 42 }} dpr={[1, 2]} onPointerMissed={() => onSelect(null)} aria-label="Vista 3D da propriedade">
-      <color attach="background" args={['#0B1511']} />
-      <fog attach="fog" args={['#0B1511', 18, 34]} />
+      <color attach="background" args={['#0A1322']} />
+      <fog attach="fog" args={['#0A1322', 18, 34]} />
       <ambientLight intensity={0.55} />
       <directionalLight position={[6, 12, 6]} intensity={1.4} castShadow shadow-mapSize={[1024, 1024]} />
       <hemisphereLight args={['#B7F3D0', '#123D2A', 0.4]} />

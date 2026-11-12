@@ -72,7 +72,7 @@ export class AiService {
           devices: { include: { sensors: true, actuators: true } },
         },
       }),
-      this.prisma.recommendation.findMany({ where: { farmId }, include: { project: true }, orderBy: { score: 'desc' } }),
+      this.prisma.recommendation.findMany({ where: { farmId }, include: { project: true }, orderBy: { rawScore: 'desc' } }),
     ]);
     const profile = await this.recs.buildProfile(farmId);
     const sensorIds = farm.devices.flatMap((d) => d.sensors.map((s) => s.id));

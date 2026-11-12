@@ -7,6 +7,7 @@ import { Badge, priorityTone } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState, ErrorState, Notice, PageLoader } from '@/components/ui/feedback';
+import { Photo } from '@/components/photo';
 import { PageHeader, Stat } from '@/components/ui/page-header';
 import { CropAreaChart } from '@/features/dashboard/crop-area-chart';
 import { FarmExplorer } from '@/features/dashboard/farm-explorer';
@@ -72,18 +73,24 @@ export default function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Painel"
-        title={`Olá, ${firstName}`}
-        description={`${k.farmCount} propriedade(s) · ${fmtNum(k.cultivatedAreaHa)} de ${fmtNum(k.totalAreaHa)} ha cultivados`}
-        actions={
-          <Button asChild variant="outline">
+      <section className="dark relative isolate mb-6 overflow-hidden rounded-2xl text-snow">
+        <Photo k="angola-namibe-campo" priority sizes="(min-width:1024px) 75vw, 100vw" className="absolute inset-0 -z-10" imgClassName="object-[center_45%]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night via-night/80 to-night/10" />
+        <div className="flex flex-col gap-4 px-6 py-8 sm:flex-row sm:items-end sm:justify-between sm:px-8 sm:py-10">
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-tech">Painel</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight">Olá, {firstName}</h1>
+            <p className="text-sm text-snow/75">
+              {k.farmCount} propriedade(s) · {fmtNum(k.cultivatedAreaHa)} de {fmtNum(k.totalAreaHa)} ha cultivados
+            </p>
+          </div>
+          <Button asChild variant="outline" className="border-white/25 bg-black/30 text-snow backdrop-blur hover:bg-white/10">
             <Link href="/recommendations">
               <Wand2 /> Recomendações
             </Link>
           </Button>
-        }
-      />
+        </div>
+      </section>
       {farm?.isDemo && (
         <Notice tone="demo" className="mb-4">
           <b>Dados de demonstração.</b> Esta propriedade foi criada para demonstração; os valores não correspondem a uma exploração real.

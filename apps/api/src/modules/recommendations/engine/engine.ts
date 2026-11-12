@@ -299,7 +299,8 @@ export function evaluateProject(
     add('BUDGET_OVER', -25, `Custo estimado ${formatKz(cost)} excede o orçamento de ${formatKz(p.budgetKz)}.`);
   }
 
-  const score = Math.max(0, Math.min(100, Math.round(reasons.reduce((s, r) => s + r.weight, 0))));
+  const rawScore = Math.round(reasons.reduce((s, r) => s + r.weight, 0));
+  const score = Math.max(0, Math.min(100, rawScore));
   if (score < MIN_SCORE) {
     return { excluded: `Pontuação baixa (${score}) para as condições desta propriedade.` };
   }
@@ -320,6 +321,7 @@ export function evaluateProject(
       projectId: project.id,
       projectSlug: project.slug,
       score,
+      rawScore,
       priority,
       problem,
       reasons: reasons.sort((a, b) => b.weight - a.weight),
@@ -341,7 +343,7 @@ export function recommend(profile: FarmProfile, catalog: CatalogProject[], limit
     if ('rec' in r) recommendations.push(r.rec);
     else excluded.push({ projectSlug: project.slug, reason: r.excluded });
   }
-  recommendations.sort((a, b) => b.score - a.score || a.estimatedCostKz - b.estimatedCostKz);
+  recommendations.sort((a, b) => b.rawScore - a.rawScore || a.estimatedCostKz - b.estimatedCostKz);
 
   const missingData: string[] = [];
   if (profile.budgetKz === null) missingData.push('Orçamento disponível para tecnologia');

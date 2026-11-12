@@ -5,7 +5,9 @@ import Link from 'next/link';
 import * as React from 'react';
 import { toast } from 'sonner';
 import { formatKz } from '@agrogenius/shared';
+import { Photo } from '@/components/photo';
 import { Badge } from '@/components/ui/badge';
+import { mediaFor } from '@/content/project-media';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState, ErrorState, Notice, PageLoader } from '@/components/ui/feedback';
@@ -152,10 +154,17 @@ export default function RecommendationsPage() {
                   key={r.id}
                   href={`/recommendations/${r.id}`}
                   className={cn(
-                    'group flex flex-col rounded-lg border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40',
+                    'group flex flex-col overflow-hidden rounded-xl border bg-card shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow',
                     r === top && filter === 'ACTIVE' && 'border-primary/40 bg-gradient-to-br from-primary/[0.07] to-card lg:col-span-2',
                   )}
                 >
+                  <Photo
+                    k={mediaFor(r.project.slug).photo}
+                    sizes="(min-width:1024px) 50vw, 100vw"
+                    className={cn(r === top && filter === 'ACTIVE' ? 'aspect-[21/5]' : 'aspect-[16/5]')}
+                    imgClassName="transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start gap-4">
                     <ScoreRing score={r.score} />
                     <div className="min-w-0 flex-1">
@@ -197,6 +206,7 @@ export default function RecommendationsPage() {
                     <span className="flex items-center gap-1 text-sm text-primary">
                       Ver plano completo <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                     </span>
+                  </div>
                   </div>
                 </Link>
               ))}

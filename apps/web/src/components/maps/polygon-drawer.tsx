@@ -56,7 +56,7 @@ export default function PolygonDrawer({
     setGeoJSON(map, 'draw', { type: 'FeatureCollection', features: [] });
     map.addLayer({ id: 'draw-fill', type: 'fill', source: 'draw', filter: ['==', '$type', 'Polygon'], paint: { 'fill-color': '#27C77B', 'fill-opacity': 0.25 } });
     map.addLayer({ id: 'draw-line', type: 'line', source: 'draw', filter: ['!=', '$type', 'Point'], paint: { 'line-color': '#27C77B', 'line-width': 2.5 } });
-    map.addLayer({ id: 'draw-pts', type: 'circle', source: 'draw', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': 5, 'circle-color': '#0B1511', 'circle-stroke-color': '#27C77B', 'circle-stroke-width': 2 } });
+    map.addLayer({ id: 'draw-pts', type: 'circle', source: 'draw', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': 5, 'circle-color': '#0A1322', 'circle-stroke-color': '#27C77B', 'circle-stroke-width': 2 } });
     return () => {
       map.off('click', click);
     };

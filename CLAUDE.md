@@ -43,6 +43,17 @@ npm run typecheck
   próprios limites. Desligar nunca é bloqueado; ligar uma bomba sem proteção contra funcionamento a seco não passa.
 - **Acesso a propriedades só via `FarmAccessService`.** É o único ponto de isolamento multi-tenant.
 
+## Imagens
+
+- Só fotografias reais com licença livre (Wikimedia Commons), em `apps/web/public/images`, registadas em
+  `src/content/photos.ts` com autor e licença. Usa sempre `<Photo>`: mostra o crédito, que a licença exige.
+- Nunca rotular uma foto como "Angola" sem confirmar a localização nas categorias do Commons.
+- O globo 3D da landing usa texturas NASA (domínio público) em `public/images/globe`, registadas em
+  `src/content/globe-textures.ts` e mostradas em `/creditos`. As nuvens são procedurais, não meteorologia real.
+- Fotos de projetos são "sistemas semelhantes em uso": diz isso na interface. Cada projeto tem foto e
+  ilustração em `src/content/project-media.ts`; as ilustrações animadas estão em
+  `components/illustrations/system-illustration.tsx` e os valores mostrados devem bater com o motor e o firmware.
+
 ## Armadilhas conhecidas
 
 - O embedded-postgres tem de ficar na versão `17.11.0-beta.19`; a 18 rebenta no Windows.

@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/feedback';
 import { Input, Select } from '@/components/ui/input';
-import { PageHeader } from '@/components/ui/page-header';
+import { Photo } from '@/components/photo';
+import { mediaFor } from '@/content/project-media';
 import { CATEGORIES, CATEGORY_ICON, DIFFICULTIES, DifficultyBadge, OfflineBadge } from '@/features/lab/project-meta';
 import { api } from '@/lib/api';
 import type { ProjectListItem } from '@/lib/types';
@@ -74,11 +75,18 @@ function LabInner() {
 
   return (
     <div className="pb-24">
-      <PageHeader
-        eyebrow="AgroTech Lab"
-        title="Biblioteca de Soluções Inteligentes"
-        description="Projetos tecnológicos agrícolas prontos a implementar: materiais, esquemas de ligação, código para ESP32 e passos de montagem. Os custos são preços de referência — confirma com fornecedores locais."
-      />
+      <section className="dark relative isolate mb-6 overflow-hidden rounded-2xl text-snow">
+        <Photo k="kit-gota-a-gota" priority sizes="(min-width:1024px) 70vw, 100vw" className="absolute inset-0 -z-10" imgClassName="object-[center_60%]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night via-night/80 to-night/20" />
+        <div className="max-w-2xl space-y-2 px-6 py-10 sm:px-10 sm:py-14">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-tech">AgroTech Lab</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Biblioteca de Soluções Inteligentes</h1>
+          <p className="text-sm text-snow/75 sm:text-base">
+            Projetos que já funcionam no campo — com materiais, esquemas de ligação, código para ESP32, montagem e a animação de cada sistema a
+            trabalhar. Custos são preços de referência: confirma com fornecedores locais.
+          </p>
+        </div>
+      </section>
 
       {/* Categorias */}
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
@@ -168,9 +176,16 @@ function LabInner() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {items.map((p) => (
-                    <article key={p.id} className="group relative flex flex-col rounded-lg border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40">
-                      <div className="mb-3 flex items-start justify-between gap-3">
-                        <div className="flex flex-wrap gap-1.5">
+                    <article key={p.id} className="group relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow">
+                      <div className="relative">
+                        <Photo
+                          k={mediaFor(p.slug).photo}
+                          sizes="(min-width:1280px) 33vw, (min-width:640px) 50vw, 100vw"
+                          className="aspect-[16/9]"
+                          imgClassName="transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 [&>*]:border-white/20 [&>*]:bg-black/55 [&>*]:text-white [&>*]:backdrop-blur">
                           <DifficultyBadge value={p.difficulty} />
                           <OfflineBadge offline={p.worksOffline} />
                         </div>
@@ -178,11 +193,12 @@ function LabInner() {
                           onClick={() => fav.mutate(p.slug)}
                           aria-label={p.isFavorite ? 'Remover dos favoritos' : 'Guardar nos favoritos'}
                           aria-pressed={p.isFavorite}
-                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="absolute right-3 top-3 z-10 rounded-full bg-black/40 p-2 text-white backdrop-blur hover:bg-black/60"
                         >
                           <Heart className={cn('size-4', p.isFavorite && 'fill-primary text-primary')} />
                         </button>
                       </div>
+                      <div className="flex flex-1 flex-col p-5">
                       <Link href={`/lab/${p.slug}`} className="after:absolute after:inset-0">
                         <h3 className="font-display text-base font-semibold leading-snug">{p.title}</h3>
                       </Link>
@@ -216,6 +232,7 @@ function LabInner() {
                           )}
                           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                         </span>
+                      </div>
                       </div>
                     </article>
                   ))}

@@ -712,6 +712,8 @@ model Recommendation {
   source          RecommendationSource @default(ENGINE)
   engineVersion   String?
   score           Float
+  /// pontuação antes do limite de 100 (ordenação/desempate)
+  rawScore        Float                @default(0)
   priority        Priority
   problem         String
   /// [{ code, text, weight }] — razões ligadas a dados concretos da propriedade

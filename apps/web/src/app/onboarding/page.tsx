@@ -18,6 +18,12 @@ import { StepFarm, StepGoals, StepInfrastructure, StepPersonal, StepProduction }
 
 type Form = OnboardingInput;
 
+import { Photo } from '@/components/photo';
+import type { PhotoKey } from '@/content/photos';
+
+/** Uma fotografia por etapa: quem és, a tua terra, o que produzes, o que já tens, onde queres chegar. */
+const STEP_PHOTOS: PhotoKey[] = ['agricultora-horta', 'angola-namibe-campo', 'angola-colheita-batata', 'bomba-solar-comunidade', 'kit-gota-a-gota'];
+
 const STEPS: { key: keyof Form; title: string; subtitle: string; Comp: React.ComponentType }[] = [
   { key: 'personal', title: 'Informações pessoais', subtitle: 'Quem és e onde trabalhas', Comp: StepPersonal },
   { key: 'farm', title: 'Propriedade agrícola', subtitle: 'Localização, solo e água', Comp: StepFarm },
@@ -168,6 +174,9 @@ export default function OnboardingPage() {
             </ol>
 
             <Card className="overflow-hidden p-5 sm:p-8">
+              <motion.div key={`photo-${step}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="-mx-5 -mt-5 mb-6 sm:-mx-8 sm:-mt-8">
+                <Photo k={STEP_PHOTOS[step]} priority={step === 0} sizes="(min-width:768px) 768px, 100vw" className="aspect-[21/8] sm:aspect-[21/6]" />
+              </motion.div>
               <div className="mb-6">
                 <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">
                   Etapa {step + 1} de {STEPS.length}

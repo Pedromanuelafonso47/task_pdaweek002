@@ -61,7 +61,7 @@ export class DashboardController {
       this.prisma.recommendation.findMany({
         where: { farmId: { in: farmIds }, status: 'PENDING' },
         include: { project: { select: { slug: true, title: true, category: true } }, farm: { select: { id: true, name: true } } },
-        orderBy: { score: 'desc' },
+        orderBy: { rawScore: 'desc' },
         take: 4,
       }),
       this.prisma.notification.count({ where: { userId: user.id, readAt: null } }),

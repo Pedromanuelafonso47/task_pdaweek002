@@ -20,13 +20,15 @@ export default {
         accent: { DEFAULT: token('accent'), foreground: token('accent-foreground') },
         destructive: { DEFAULT: token('destructive'), foreground: token('destructive-foreground') },
         warning: token('warning'),
-        // Paleta da marca
-        deep: '#123D2A',
-        tech: '#27C77B',
-        mint: '#B7F3D0',
-        night: '#0B1511',
-        snow: '#F5F8F5',
-        stone: '#89958E',
+        // Paleta da marca — noite angolana, folha e colheita
+        deep: '#10283A', // azul-petróleo profundo
+        tech: '#F2B33D', // dourado de colheita (destaques, ícones)
+        leaf: '#35B572', // verde-folha (ações)
+        sky: '#4FA8E8', // azul-céu (água, dados)
+        mint: '#F4E4C1', // areia clara (texto de realce em fundo escuro)
+        night: '#0A1322', // azul-noite
+        snow: '#F7F5F0', // branco quente
+        stone: '#8D96A3',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],

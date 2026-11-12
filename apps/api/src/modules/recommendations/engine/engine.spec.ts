@@ -135,6 +135,19 @@ describe('Motor de recomendações', () => {
     }
   });
 
+  it('em empate no teto de 100, o projeto com mais razões fica à frente (não o mais barato)', () => {
+    const rich = {
+      ...huambo,
+      hasPumps: true,
+      waterAvailability: 'SEASONAL' as const,
+      problems: ['WATER_WASTE', 'IRREGULAR_RAIN'] as FarmProfile['problems'],
+      goals: ['REDUCE_WATER', 'AUTOMATE_IRRIGATION', 'MONITOR_CLIMATE'] as FarmProfile['goals'],
+      zoneCount: 4,
+    };
+    const r = recommend(rich, catalog);
+    expect(r.recommendations[0].projectSlug).toBe('esp32-smart-irrigation');
+  });
+
   it('é determinístico', () => {
     expect(recommend(huambo, catalog)).toEqual(recommend(huambo, catalog));
   });

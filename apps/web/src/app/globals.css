@@ -5,42 +5,42 @@
 /* Tokens AGROGENIUS — HSL para composição com opacidade */
 @layer base {
   :root {
-    --background: 120 18% 97%; /* #F5F8F5 */
-    --foreground: 152 22% 7%;
+    --background: 40 30% 97%; /* #F9F7F2 */
+    --foreground: 217 40% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 152 22% 7%;
-    --muted: 130 14% 92%;
-    --muted-foreground: 145 5% 40%;
-    --border: 135 12% 86%;
-    --input: 135 12% 84%;
-    --ring: 151 67% 46%;
-    --primary: 151 67% 36%;
+    --card-foreground: 217 40% 10%;
+    --muted: 40 20% 92%;
+    --muted-foreground: 217 10% 40%;
+    --border: 38 18% 86%;
+    --input: 38 18% 84%;
+    --ring: 148 55% 40%;
+    --primary: 148 58% 34%; /* verde-folha */
     --primary-foreground: 0 0% 100%;
-    --accent: 150 54% 15%; /* #123D2A */
-    --accent-foreground: 146 72% 84%;
+    --accent: 210 57% 15%; /* #10283A */
+    --accent-foreground: 39 87% 70%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --grid: 151 30% 20% / 0.06;
+    --grid: 217 40% 20% / 0.05;
   }
   .dark {
-    --background: 152 31% 6%; /* #0B1511 */
-    --foreground: 120 18% 96%;
-    --card: 152 26% 9%;
-    --card-foreground: 120 18% 96%;
-    --muted: 152 20% 13%;
-    --muted-foreground: 145 5% 57%; /* ~#89958E */
-    --border: 152 18% 17%;
-    --input: 152 18% 20%;
-    --ring: 151 67% 46%;
-    --primary: 151 67% 46%; /* #27C77B */
-    --primary-foreground: 152 31% 6%;
-    --accent: 146 72% 84%; /* #B7F3D0 */
-    --accent-foreground: 150 54% 15%;
+    --background: 217 55% 9%; /* #0A1322 azul-noite */
+    --foreground: 40 30% 96%;
+    --card: 217 42% 12%;
+    --card-foreground: 40 30% 96%;
+    --muted: 217 30% 16%;
+    --muted-foreground: 215 12% 62%;
+    --border: 217 26% 20%;
+    --input: 217 26% 23%;
+    --ring: 148 55% 48%;
+    --primary: 148 55% 46%; /* #35B572 verde-folha */
+    --primary-foreground: 217 55% 8%;
+    --accent: 39 87% 59%; /* #F2B33D dourado de colheita */
+    --accent-foreground: 217 55% 10%;
     --destructive: 0 70% 58%;
     --destructive-foreground: 0 0% 100%;
     --warning: 38 92% 56%;
-    --grid: 146 72% 84% / 0.05;
+    --grid: 39 87% 59% / 0.04;
   }
 
   * {
@@ -91,7 +91,52 @@
   @apply !border-t-card;
 }
 
+/* ── Ilustrações animadas dos projetos (ciclo de 10 s sincronizado) ── */
+.ag-a {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Estado de repouso (sem animação): fase "antes da rega" — coerente para quem pede menos movimento */
+.ag-phase-water, .ag-flash, .ag-wet { opacity: 0; }
+.ag-drop { animation: ag-drop 1.1s linear infinite; }
+.ag-phase-water { animation: ag-phase-water 10s ease-in-out infinite; }
+.ag-phase-dry { animation: ag-phase-dry 10s ease-in-out infinite; }
+.ag-wet { animation: ag-wet 10s ease-in-out infinite; }
+.ag-fill-x { transform-origin: left center; animation: ag-fill-x 10s ease-in-out infinite; }
+.ag-fill-y { transform-origin: center bottom; animation: ag-fill-y 10s ease-in-out infinite; }
+.ag-blink { animation: ag-blink 1.2s ease-in-out infinite; }
+.ag-wave { animation: ag-wave 2.4s ease-out infinite; }
+.ag-spin { animation: ag-spin 1.6s linear infinite; }
+.ag-spin-slow { animation: ag-spin 6s linear infinite; }
+.ag-flow { stroke-dasharray: 6 6; animation: ag-flow 0.6s linear infinite; }
+.ag-rain { animation: ag-rain 0.9s linear infinite; }
+.ag-level { animation: ag-level 10s ease-in-out infinite; }
+.ag-pulse { animation: ag-pulse 2s ease-in-out infinite; }
+.ag-step { animation: ag-step 10s linear infinite; }
+.ag-flash { animation: ag-flash 5s ease-out infinite; }
+.ag-sway { transform-origin: center bottom; animation: ag-sway 5s ease-in-out infinite; }
+
+@keyframes ag-drop { 0% { transform: translateY(0); opacity: 0 } 15% { opacity: 1 } 85% { opacity: 1 } 100% { transform: translateY(34px); opacity: 0 } }
+@keyframes ag-phase-water { 0%, 28% { opacity: 0 } 32%, 80% { opacity: 1 } 84%, 100% { opacity: 0 } }
+@keyframes ag-phase-dry { 0%, 28% { opacity: 1 } 32%, 80% { opacity: 0 } 84%, 100% { opacity: 1 } }
+@keyframes ag-wet { 0%, 30% { opacity: 0 } 65%, 82% { opacity: 0.75 } 100% { opacity: 0 } }
+@keyframes ag-fill-x { 0%, 28% { transform: scaleX(1) } 78%, 86% { transform: scaleX(1.68) } 100% { transform: scaleX(1) } }
+@keyframes ag-fill-y { 0%, 15% { transform: scaleY(0.9) } 50%, 60% { transform: scaleY(0.3) } 100% { transform: scaleY(0.9) } }
+@keyframes ag-blink { 0%, 100% { opacity: 0.25 } 50% { opacity: 1 } }
+@keyframes ag-wave { 0% { opacity: 0; transform: scale(0.4) } 30% { opacity: 0.9 } 100% { opacity: 0; transform: scale(1.5) } }
+@keyframes ag-spin { to { transform: rotate(360deg) } }
+@keyframes ag-flow { to { stroke-dashoffset: -24 } }
+@keyframes ag-rain { 0% { transform: translate(0, -6px); opacity: 0 } 20% { opacity: 1 } 100% { transform: translate(-8px, 70px); opacity: 0 } }
+@keyframes ag-level { 0%, 15% { transform: translateY(0) } 50%, 60% { transform: translateY(46px) } 100% { transform: translateY(0) } }
+@keyframes ag-pulse { 0%, 100% { opacity: 0.45 } 50% { opacity: 1 } }
+@keyframes ag-step { 0%, 24% { opacity: 1 } 26%, 100% { opacity: 0.3 } }
+@keyframes ag-flash { 0%, 3% { opacity: 0.9 } 12%, 100% { opacity: 0 } }
+@keyframes ag-sway { 0%, 100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
+
 @media (prefers-reduced-motion: reduce) {
+  [class*='ag-'] {
+    animation: none !important;
+  }
   *,
   *::before,
   *::after {

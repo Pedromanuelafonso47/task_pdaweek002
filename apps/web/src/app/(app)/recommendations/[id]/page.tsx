@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { LABELS, formatKz } from '@agrogenius/shared';
+import { SystemIllustration } from '@/components/illustrations/system-illustration';
+import { Photo } from '@/components/photo';
 import { Badge } from '@/components/ui/badge';
+import { mediaFor } from '@/content/project-media';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorState, Notice, PageLoader } from '@/components/ui/feedback';
@@ -55,6 +58,7 @@ export default function RecommendationDetail() {
   const required = r.bom.filter((b) => !b.optional);
   const optional = r.bom.filter((b) => b.optional);
   const budget = r.farm.budgetKz ? Number(r.farm.budgetKz) : null;
+  const media = mediaFor(r.project.slug);
 
   return (
     <div className="space-y-6">
@@ -62,8 +66,10 @@ export default function RecommendationDetail() {
         <ArrowLeft className="size-4" /> Recomendações
       </Link>
 
-      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-primary/10 via-card to-card p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="dark relative isolate overflow-hidden rounded-2xl border text-snow">
+        <Photo k={media.photo} priority sizes="(min-width:1024px) 75vw, 100vw" className="absolute inset-0 -z-10" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night via-night/85 to-night/30" />
+        <div className="flex min-h-[220px] flex-col justify-end gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between [&_.text-muted-foreground]:text-snow/70">
           <div className="flex gap-4">
             <ScoreRing score={r.score} size={64} />
             <div className="space-y-2">
@@ -115,6 +121,15 @@ export default function RecommendationDetail() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          <Card className="overflow-hidden">
+            <CardHeader>
+              <CardTitle>Como vai funcionar na tua lavra</CardTitle>
+              <CardDescription>Ciclo de funcionamento do sistema recomendado. Os valores da animação são exemplos.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SystemIllustration kind={media.illustration} />
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Porquê esta recomendação</CardTitle>

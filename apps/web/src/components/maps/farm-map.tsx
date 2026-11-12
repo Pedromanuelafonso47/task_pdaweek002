@@ -105,7 +105,7 @@ export default function FarmMap({
         el.type = 'button';
         el.setAttribute('aria-label', d.name);
         const color = d.status === 'ONLINE' ? '#27C77B' : d.status === 'OFFLINE' ? '#ef4444' : '#89958E';
-        el.style.cssText = `width:18px;height:18px;border-radius:9999px;background:${color};border:3px solid #0B1511;box-shadow:0 0 0 2px ${color}66;cursor:pointer`;
+        el.style.cssText = `width:18px;height:18px;border-radius:9999px;background:${color};border:3px solid #0A1322;box-shadow:0 0 0 2px ${color}66;cursor:pointer`;
         el.addEventListener('click', (ev) => {
           ev.stopPropagation();
           cbs.current.onSelectDevice?.(d.id);

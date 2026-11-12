@@ -121,7 +121,7 @@ export class ReportsService {
       }
       case 'recommendations': {
         doc = new ReportDoc('Recomendações IoT', sub);
-        const recs = await this.prisma.recommendation.findMany({ where: { farmId }, include: { project: true }, orderBy: { score: 'desc' } });
+        const recs = await this.prisma.recommendation.findMany({ where: { farmId }, include: { project: true }, orderBy: { rawScore: 'desc' } });
         doc.note('Custos calculados com preços de referência AGROGENIUS — são estimativas, confirmar com fornecedores locais.');
         for (const r of recs) {
           doc.section(`${r.project.title} — prioridade ${LABELS.priority[r.priority].toLowerCase()}`);

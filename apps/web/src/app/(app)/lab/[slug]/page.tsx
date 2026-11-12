@@ -4,7 +4,10 @@ import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Heart, ListChecks, Wrenc
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { LABELS, formatKz } from '@agrogenius/shared';
+import { SystemIllustration } from '@/components/illustrations/system-illustration';
+import { Photo } from '@/components/photo';
 import { Badge } from '@/components/ui/badge';
+import { mediaFor } from '@/content/project-media';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorState, Notice, PageLoader } from '@/components/ui/feedback';
@@ -53,6 +56,7 @@ export default function ProjectPage() {
   if (isLoading) return <PageLoader />;
   if (error || !p) return <ErrorState error={error} retry={refetch} />;
   const Icon = CATEGORY_ICON[p.category];
+  const media = mediaFor(p.slug);
 
   return (
     <div className="space-y-6">
@@ -60,23 +64,25 @@ export default function ProjectPage() {
         <ArrowLeft className="size-4" /> AgroTech Lab
       </Link>
 
-      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-accent/20 via-card to-card p-6 sm:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-3">
-            <div className="flex items-center gap-2 text-sm text-primary">
+      <section className="dark relative isolate overflow-hidden rounded-2xl text-snow">
+        <Photo k={media.photo} priority sizes="(min-width:1024px) 75vw, 100vw" className="absolute inset-0 -z-10" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-night via-night/70 to-night/20 lg:bg-gradient-to-r" />
+        <div className="flex min-h-[320px] flex-col justify-end gap-4 p-6 sm:p-10 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl space-y-3">
+            <div className="flex items-center gap-2 text-sm text-tech">
               {Icon && <Icon className="size-4" />} {LABELS.projectCategory[p.category as keyof typeof LABELS.projectCategory]}
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight">{p.title}</h1>
-            <p className="text-muted-foreground">{p.tagline}</p>
-            <div className="flex flex-wrap gap-1.5">
+            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{p.title}</h1>
+            <p className="text-snow/80">{p.tagline}</p>
+            <div className="flex flex-wrap gap-1.5 [&>*]:border-white/20 [&>*]:bg-black/45 [&>*]:text-white">
               <DifficultyBadge value={p.difficulty} />
               <OfflineBadge offline={p.worksOffline} />
               <PowerBadge requires={p.requiresElectricity} />
             </div>
+            <p className="text-[11px] text-snow/55">Fotografia ilustrativa de um sistema semelhante em uso.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => fav.mutate()} loading={fav.isPending}>
+            <Button variant="outline" className="border-white/25 bg-black/30 text-snow backdrop-blur hover:bg-white/10" onClick={() => fav.mutate()} loading={fav.isPending}>
               <Heart className={cn(p.isFavorite && 'fill-primary text-primary')} /> {p.isFavorite ? 'Nos favoritos' : 'Guardar'}
             </Button>
             <Button asChild>
@@ -84,7 +90,7 @@ export default function ProjectPage() {
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Custo base de referência" value={formatKz(p.baseCostKz)} sub="1 zona, com eletricidade — o custo real é dimensionado por propriedade" />
@@ -93,8 +99,9 @@ export default function ProjectPage() {
         <Stat label="Materiais" value={`${p.components.length} itens`} sub={`${p.components.filter((c) => c.optional).length} opcionais`} />
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue="live">
         <TabsList>
+          <TabsTrigger value="live">A funcionar</TabsTrigger>
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
           <TabsTrigger value="architecture">Arquitetura</TabsTrigger>
           <TabsTrigger value="materials">Materiais</TabsTrigger>
@@ -102,6 +109,14 @@ export default function ProjectPage() {
           {p.firmware && <TabsTrigger value="code">Código ESP32</TabsTrigger>}
           <TabsTrigger value="build">Montagem</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="live" className="mt-4 space-y-3">
+          <SystemIllustration kind={media.illustration} title={`${p.title} a funcionar`} />
+          <p className="text-xs text-muted-foreground">
+            Animação técnica do ciclo de funcionamento. Os valores mostrados são exemplos; na tua propriedade, os limites vêm da cultura e das regras que
+            configurares em AgroControl.
+          </p>
+        </TabsContent>
 
         <TabsContent value="overview" className="mt-4 grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">

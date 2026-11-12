@@ -22,7 +22,7 @@ export function HeroGlobe() {
 
   return (
     <div className="relative aspect-square w-full max-w-[620px]">
-      <div className="absolute inset-[12%] rounded-full bg-tech/20 blur-3xl" />
+      <div className="absolute inset-[12%] rounded-full bg-sky/25 blur-3xl" />
       {webgl === false ? (
         <div className="relative grid h-full place-items-center rounded-full border border-white/10 text-center text-sm text-mint/70">
           Globo 3D indisponível neste dispositivo (WebGL).
