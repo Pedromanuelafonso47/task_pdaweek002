@@ -72,6 +72,12 @@ docs/             ARCHITECTURE · IOT · DEPLOY · NOTIFICATIONS
 | Fotografias (S3/Cloudinary) | credenciais de armazenamento; campo `Farm.photos` existe |
 | Imagens de satélite / NDVI | fornecedor de imagens; arquitetura e migração PostGIS documentadas |
 
+## Skill do Claude Code
+
+A skill [`agrotech`](.claude/skills/agrotech/) transforma a descrição que um agricultor faz da lavra em
+sugestões de projetos IoT do catálogo, com as mesmas regras e preços de referência do motor. O teste de
+disparo está em [docs/evidencia-skill.md](docs/evidencia-skill.md).
+
 ## Honestidade dos dados
 
 - Preços dos componentes: **estimativas de referência** (`apps/api/src/modules/projects/catalog/prices.ts`), sempre rotuladas como tal.
